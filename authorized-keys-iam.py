@@ -16,6 +16,7 @@ Options:
 
 """
 from docopt import docopt
+from subprocess import call
 
 import boto3
 import sys
@@ -42,13 +43,13 @@ def get_missing_users():
   iam_users = client.list_users()["Users"]
   system_users = map(lambda x: x.pw_name, pwd.getpwall())
   for user in iam_users:
-    if user not in system_users:
-      missing.append(user)
+    if user["UserName"] not in system_users:
+      missing.append(user["UserName"])
 
   return missing
 
 def add_user(user):
-  call("/usr/sbin/adduser " + shlex.quote(user))
+  call(["/usr/sbin/adduser", "--shell=/bin/bash", "--disabled-password", "--quiet", "--gecos=\"\"", shlex.quote(user)])
 
 if __name__ == '__main__':
   arguments = docopt(__doc__, version="Authorized Keys IAM 0.1")
@@ -56,4 +57,4 @@ if __name__ == '__main__':
     user = arguments["<user>"]
     print_user_keys(user)
   elif arguments["sync-users"]:
-    map(add_user, get_missing_users())
+    list(map(add_user, get_missing_users()))
