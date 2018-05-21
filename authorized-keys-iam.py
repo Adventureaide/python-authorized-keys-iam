@@ -43,7 +43,7 @@ def get_missing_users():
   system_users = map(lambda x: x.pw_name, pwd.getpwall())
   for user in iam_users:
     if user not in system_users:
-      missing.push(user)
+      missing.append(user)
 
   return missing
 
